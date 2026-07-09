@@ -1,0 +1,38 @@
+[package]
+name = "claude-session-key-importer"
+version = "0.1.0"
+description = "Cross-platform Claude sessionKey importer for local browser profiles"
+authors = ["gexinggexing"]
+edition = "2024"
+license = "MIT"
+
+[lib]
+name = "claude_session_key_importer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "claude-session-key-importer"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+dirs = "6"
+regex = "1"
+rfd = "0.15"
+rusqlite = { version = "0.37", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+thiserror = "2"
+tungstenite = { version = "0.28", features = ["native-tls"] }
+ureq = { version = "3", features = ["json"] }
+url = "2"
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3"
+
