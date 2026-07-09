@@ -12,6 +12,9 @@ type BrowserProfile = {
   is_locked_suspected: boolean;
   is_running: boolean;
   cdp_endpoint: string | null;
+  browser_executable_path: string | null;
+  cdp_user_data_dir: string | null;
+  cdp_profile_directory: string | null;
 };
 
 type ParsedSession = {
@@ -59,12 +62,16 @@ const emptyProfile: BrowserProfile = {
   is_locked_suspected: false,
   is_running: false,
   cdp_endpoint: null,
+  browser_executable_path: null,
+  cdp_user_data_dir: null,
+  cdp_profile_directory: null,
 };
 
 function profileStatus(profile: BrowserProfile) {
   if (!profile.cookies_db_exists) return "Missing Cookies DB";
   if (profile.is_running) return "Profile running";
   if (profile.is_locked_suspected) return "Lock suspected";
+  if (profile.browser_executable_path) return "Profile CDP ready";
   return "Ready";
 }
 
@@ -193,7 +200,7 @@ export default function App() {
           <h1>Claude Session Key Importer</h1>
           <p className="lede">
             Select a local Chromium or Claude Desktop profile, parse a sessionKey safely,
-            back up the Cookies database, then inject and verify the cookie.
+            launch that exact profile through local CDP when possible, then inject and verify the cookie.
           </p>
         </div>
         <div className="status-panel" aria-live="polite">
@@ -256,6 +263,10 @@ export default function App() {
               <span>Cookies DB</span>
               <code>{selectedProfile.cookies_db_path || "No Cookies database selected"}</code>
             </p>
+            <p>
+              <span>CDP executable</span>
+              <code>{selectedProfile.browser_executable_path || "Not detected; manual endpoint or SQLite fallback required"}</code>
+            </p>
           </div>
 
           <label className="field-block">
@@ -282,23 +293,23 @@ export default function App() {
             <label className="field-block">
               <span>Import method</span>
               <select value={method} onChange={(event) => setMethod(event.target.value as ImportMethod)}>
-                <option value="auto">Auto: CDP when available, otherwise SQLite backup</option>
-                <option value="cdp">CDP / live browser injection</option>
+                <option value="auto">Auto: launch selected profile with CDP, otherwise SQLite backup</option>
+                <option value="cdp">Profile CDP / live browser injection</option>
                 <option value="sqlite">Direct SQLite import</option>
                 <option value="manualSqlite">Manual SQLite import</option>
               </select>
-              <small>Database writes always create a timestamped backup first.</small>
+              <small>Auto/CDP is profile-level: it uses the selected profile's user-data dir and profile directory.</small>
             </label>
 
             <label className="field-block">
-              <span>CDP endpoint</span>
+              <span>Manual CDP endpoint (advanced fallback)</span>
               <input
                 value={cdpEndpoint}
                 onChange={(event) => setCdpEndpoint(event.target.value)}
                 placeholder="9222 / 127.0.0.1:9222 / ws://localhost:9222/..."
                 spellCheck={false}
               />
-              <small>Used only by Auto/CDP; must be localhost.</small>
+              <small>Leave blank to auto-launch the selected profile. Manual endpoints must be localhost.</small>
             </label>
           </div>
 
@@ -335,7 +346,7 @@ export default function App() {
             <>
               <h2>{result.method_used} complete</h2>
               <p>Masked session: <code>{result.masked_session_key}</code></p>
-              <p>Backup: <code>{result.backup_path || "CDP import did not touch the SQLite DB"}</code></p>
+              <p>Backup: <code>{result.backup_path || "Profile CDP import did not touch the SQLite DB"}</code></p>
             </>
           ) : (
             <>
