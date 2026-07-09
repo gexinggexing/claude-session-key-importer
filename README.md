@@ -1,5 +1,7 @@
 # Claude Session Key Importer
 
+[中文说明](README.zh-CN.md)
+
 A cross-platform desktop utility for importing a Claude `sessionKey` into a
 local browser or Claude Desktop profile. The app scans local Chromium-style
 profiles, accepts a manually selected `Cookies` SQLite database, creates a
@@ -63,4 +65,3 @@ or actively running profiles, use CDP mode or close the target browser first.
 ## License
 
 MIT
-
